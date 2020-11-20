@@ -1,5 +1,9 @@
-//This example code is for BLDC motor control with Hall Sensor.
-//Please be noticed it has to be modified for diffenrent motor (e.g. the motor with differnet pole number, reference PRM...)
+/*
+This example code is for BLDC motor control with Hall Sensor.
+Here, Nanotec DF45L024048-A2 16 Pole BLDC Motor is used.
+Driving with Infineon IFX007T BLDC Shield.
+Arduino UNO Controller is used.
+*/
 
 #define PWM_U 11
 #define PWM_V 10
@@ -11,20 +15,20 @@
 #define HALL_B A2
 #define HALL_C A3
 
-#define MotorPoles 16 //according the different motor it will be changed 
+#define MotorPoles 16             //according the different motor it will be changed 
 #define PI_REG_K 0.01
 #define PI_REG_I 0.001
-#define ReferenceRPM 600.0 //the referen round per min which can set by the users 
+#define ReferenceRPM 600.0       //the reference RPM is initial speed
 
 uint8_t CommutationState = 1;
 uint8_t ClosedLoop = 0;
 uint8_t OpenLoopSteps = 100;
 uint16_t OpenLoopDelay = 3000;
-uint8_t DutyCycle = 80; // it's related to the rotate speed (round per min)
+uint8_t DutyCycle = 80;           // it's related to the rotate speed (round per min)
 uint8_t oldHall, latestHall = 0;
 uint16_t HallCounts = 0;
 unsigned long PI_Update_Timeout = 999999999;
-uint16_t LastRPM = 0; //the current rotate speed 
+uint16_t LastRPM = 0;             //the current rotate speed 
 
 float RefRPM = ReferenceRPM;
 float PI_K = PI_REG_K;
@@ -34,9 +38,9 @@ float PI_Integral = 0.0;
 void setup() {
 
 Serial.begin(115200);
-setPwmFrequency(PWM_U,1); //set the frequency at 31250Hz
-setPwmFrequency(PWM_V,1); //set the frequency at 31250Hz
-setPwmFrequency(PWM_W,1); //set the frequency at 31250Hz
+setPwmFrequency(PWM_U,1);           //set the frequency at 31250Hz
+setPwmFrequency(PWM_V,1);           //set the frequency at 31250Hz
+setPwmFrequency(PWM_W,1);           //set the frequency at 31250Hz
   // put your setup code here, to run once:
 
 
@@ -68,16 +72,11 @@ void loop() {
     while(oldHall == UpdateHall());
     HallCounts++;
   }
-  
+  //To vary speed over serial terminal
   if (Serial.available() > 0) {
     byte in = Serial.read();
-    if (in == '+') RefRPM+=100; //RefRPM + 100
-    if (in == '-') RefRPM-=100; //RefRPM - 100
-    //if (in == 'r') Serial.println(LastRPM,DEC); //show latest RPM status
-    //if (in == 'd') Serial.println(DutyCycle,DEC); //Show DutyCycle
-    //if (in == 'c') Serial.println(ClosedLoop,DEC); //Is in Closed Loop?
-    //if (in == 'm') Serial.println(millis(), DEC); //TimeStamp
-    //if (in == 't') Serial.println(PI_Update_Timeout, DEC); 
+    if (in == '+') RefRPM+=100;           //RefRPM + 100
+    if (in == '-') RefRPM-=100;           //RefRPM - 100
   }
   
   PI_Regulator_DoWork();
